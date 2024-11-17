@@ -1,0 +1,148 @@
+-- Create the main button
+local ScreenGui = Instance.new("ScreenGui")
+local MainButton = Instance.new("TextButton")
+
+ScreenGui.Parent = game.CoreGui
+MainButton.Parent = ScreenGui
+MainButton.Text = "Open GUI"
+MainButton.Size = UDim2.new(0, 100, 0, 50)
+MainButton.Position = UDim2.new(0, 50, 0, 50)
+MainButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+
+-- Make the button draggable
+local UIS = game:GetService("UserInputService")
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    MainButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+MainButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainButton.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+MainButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- Create the GUI
+local GUI = Instance.new("Frame")
+local FPSToggle = Instance.new("TextButton")
+local PingToggle = Instance.new("TextButton")
+local FPSBooster = Instance.new("TextButton")
+
+GUI.Parent = ScreenGui
+GUI.Size = UDim2.new(0, 200, 0, 150)
+GUI.Position = UDim2.new(0, 200, 0, 50)
+GUI.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+GUI.Visible = false
+
+FPSToggle.Parent = GUI
+FPSToggle.Text = "Toggle FPS Counter"
+FPSToggle.Size = UDim2.new(0, 180, 0, 30)
+FPSToggle.Position = UDim2.new(0, 10, 0, 10)
+FPSToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+
+PingToggle.Parent = GUI
+PingToggle.Text = "Toggle Ping Counter"
+PingToggle.Size = UDim2.new(0, 180, 0, 30)
+PingToggle.Position = UDim2.new(0, 10, 0, 50)
+PingToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+
+FPSBooster.Parent = GUI
+FPSBooster.Text = "FPS Booster"
+FPSBooster.Size = UDim2.new(0, 180, 0, 30)
+FPSBooster.Position = UDim2.new(0, 10, 0, 90)
+FPSBooster.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+
+-- Toggle GUI visibility
+MainButton.MouseButton1Click:Connect(function()
+    GUI.Visible = not GUI.Visible
+end)
+
+-- FPS Counter functionality
+local fpsCounterEnabled = false
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Parent = ScreenGui
+fpsLabel.Size = UDim2.new(0, 100, 0, 50)
+fpsLabel.Position = UDim2.new(0, 50, 0, 150)
+fpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+fpsLabel.Visible = false
+
+FPSToggle.MouseButton1Click:Connect(function()
+    fpsCounterEnabled = not fpsCounterEnabled
+    fpsLabel.Visible = fpsCounterEnabled
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if fpsCounterEnabled then
+        fpsLabel.Text = "FPS: " .. tostring(math.floor(1 / game:GetService("RunService").RenderStepped:Wait()))
+    end
+end)
+
+-- Ping Counter functionality
+local pingCounterEnabled = false
+local pingLabel = Instance.new("TextLabel")
+pingLabel.Parent = ScreenGui
+pingLabel.Size = UDim2.new(0, 100, 0, 50)
+pingLabel.Position = UDim2.new(0, 50, 0, 200)
+pingLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+pingLabel.Visible = false
+
+PingToggle.MouseButton1Click:Connect(function()
+    pingCounterEnabled = not pingCounterEnabled
+    pingLabel.Visible = pingCounterEnabled
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if pingCounterEnabled then
+        pingLabel.Text = "Ping: " .. tostring(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString())
+    end
+end)
+
+-- FPS Booster functionality
+FPSBooster.MouseButton1Click:Connect(function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+end)
+
+-- Functions to change color, size, and visibility
+function changeColor(element, color)
+    element.BackgroundColor3 = color
+end
+
+function changeSize(element, size)
+    element.Size = size
+end
+
+function changeVisibility(element, visibility)
+    element.Visible = visibility
+end
+
+-- Example usage:
+-- changeColor(MainButton, Color3.fromRGB(255, 0, 0))
+-- changeSize(MainButton, UDim2.new(0, 150, 0, 75))
+-- changeVisibility(MainButton, false)
